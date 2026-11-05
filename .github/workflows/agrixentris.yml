@@ -1,0 +1,38 @@
+name: Build AgriXentris
+
+on:
+  push:
+    branches: [master, agrixentris-website]
+    paths:
+      - "landing-pages/agrixentris/**"
+      - ".github/workflows/agrixentris.yml"
+  pull_request:
+    paths:
+      - "landing-pages/agrixentris/**"
+      - ".github/workflows/agrixentris.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: agrixentris-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: landing-pages/agrixentris
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+      - name: Install locked dependencies
+        run: npx --yes pnpm@11.25.0 install --frozen-lockfile
+      - name: Type check
+        run: npm run typecheck
+      - name: Production build
+        run: npm run build
